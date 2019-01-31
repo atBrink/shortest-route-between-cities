@@ -8,7 +8,6 @@ sampleCities = 'SampleCoordinates.txt'
 
 citiesRadius = 1
 
-
 # 1
 def read_coordinate_file(filename):
     mode1 = 'r'
@@ -23,7 +22,6 @@ def read_coordinate_file(filename):
 
     # Delete the row that we initialized with.
     coord_list = np.delete(coord_list, 0, axis=0)
-
     citiesCoordinates.close
 
 
