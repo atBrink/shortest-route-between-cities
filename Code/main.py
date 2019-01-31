@@ -24,6 +24,7 @@ def read_coordinate_file(filename):
     # Delete the row that we initialized with.
     coord_list = np.delete(coord_list, 0, axis=0)
     citiesCoordinates.close
+    return coord_list
 
 
 # 2
@@ -36,4 +37,5 @@ def construct_graph_connections(coord_list, radius):
     print("Hej")
 
 
-read_coordinate_file("SampleCoordinates.txt")
+def main(city):
+    print(read_coordinate_file(city))
