@@ -22,9 +22,19 @@ def read_coordinate_file(filename):
         coord_list = np.concatenate([coord_list, a], axis=0)
 
     # Delete the row that we initialized with.
-
     coord_list = np.delete(coord_list, 0, axis=0)
     citiesCoordinates.close
+    return coord_list
+
+
+# 2
+def plot_points(coord_list):
+    print("hej")
+
+
+# 3
+def construct_graph_connections(coord_list, radius):
+    print("Hej")
 
     print(coord_list)
 
@@ -44,5 +54,6 @@ def construct_graph_connections(coord_list, radius):
     print("Hej")
 
 
-read_coordinate_file("SampleCoordinates.txt")
-plot_points(coord_list)
+
+def main(city):
+    print(read_coordinate_file(city))
