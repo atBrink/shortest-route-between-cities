@@ -8,6 +8,7 @@ sampleCities = 'SampleCoordinates.txt'
 
 citiesRadius = 1
 
+
 # 1
 def read_coordinate_file(filename):
     mode1 = 'r'
