@@ -27,33 +27,25 @@ def read_coordinate_file(filename):
     return coord_list
 
 
-# 2
-def plot_points(coord_list):
-    print("hej")
-
-
 # 3
 def construct_graph_connections(coord_list, radius):
     print("Hej")
 
     print(coord_list)
 
+
 # 2
 def plot_points(coord_list):
     read_coordinate_file("SampleCoordinates.txt")
-    x=np.linspace(0,2,num=9)
-    y=np.cos(x)
-    plt.plot(x,y)
+    x = np.linspace(0, 2, num=9)
+    y = np.cos(x)
+    plt.plot(x, y)
     print("hej")
     plt.show()
-    #använd två parametrar i numrate(?)
-    #måste köra den första definitionen i den andra? Eller typ få någon output...
-
-# 3
-def construct_graph_connections(coord_list, radius):
-    print("Hej")
-
+    # använd två parametrar i numrate(?)
+    # måste köra den första definitionen i den andra? Eller typ få någon output...
 
 
 def main(city):
+    plot_points(read_coordinate_file(germanCities))
     print(read_coordinate_file(city))
