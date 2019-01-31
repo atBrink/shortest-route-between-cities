@@ -35,5 +35,6 @@ def plot_points(coord_list):
 def construct_graph_connections(coord_list, radius):
     print("Hej")
 
+print("test")
 
 read_coordinate_file("SampleCoordinates.txt")
