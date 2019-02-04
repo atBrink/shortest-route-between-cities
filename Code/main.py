@@ -1,5 +1,6 @@
 import numpy as np
 # import scipy as sp
+from scipy.sparse import csr_matrix
 import matplotlib.pyplot as plt
 
 germanCities = "GermanyCities.txt"
@@ -7,65 +8,72 @@ hungaryCities = "HungaryCities.txt"
 sampleCities = 'SampleCoordinates.txt'
 
 citiesRadius = 1
+citiesDistRadius = {germanCities: 0.0025, hungaryCities: 0.005,
+                    sampleCities: 0.08}
+
+# STARTA HÄR YO!!!!!!!!!
+startCity = sampleCities
 
 
-# 1
+# 1 - Read Coordinate-file and convert the string-values to float-values,
+# returns np.array of coordinates.
 def read_coordinate_file(filename):
     mode1 = 'r'
-    citiesCoordinates = open(filename, mode1)
-    coord_list = np.array([0, 0], ndmin=2)
+    coord_list = []
+    with open(filename, mode1) as citiesCoordinates:
 
-    for coord in citiesCoordinates:
-        a = coord[1:-2:]
-        a = a.split(',')
-        a = np.array([float(a[0]), float(a[1])], ndmin=2)
-        x = citiesRadius*(np.pi * a[0, 1])/180
-        y = citiesRadius*np.log(np.tan((np.pi/4)+(np.pi*a[0, 0])/360))
+        for coord in citiesCoordinates:
+            a = coord[1:-2:]
+            longitud, latitud = a.split(',')
+            longitud, latitud = float(longitud), float(latitud)
+            x = citiesRadius*(np.pi * latitud)/180
+            y = citiesRadius*np.log(np.tan((np.pi/4)+(np.pi*longitud)/360))
+            c = (x, y)
+            coord_list.append(c)
 
-        a[0, 0] = x
-        a[0, 1] = y
-        coord_list = np.concatenate([coord_list, a], axis=0)
-
-    # Delete the row that we initialized with.
-    coord_list = np.delete(coord_list, 0, axis=0)
-    print(coord_list)
-    citiesCoordinates.close
-    return coord_list
+    return np.array(coord_list)
 
 
-# 2
+# 2 - Creates a plot of the coordinates given
 def plot_points(coord_list):
-    read_coordinate_file("SampleCoordinates.txt")
-    print(coord_list)
-    x=[]
-    y=[]
-    for col in coord_list:
-        x.append(col[0])
-    print(x)
-    for rad in coord_list:
-        y.append(rad[1])
-    print(y)
-    # y = coord_list(1::2)
-    plt.scatter(coord_list[:, 0], coord_list[:, 1])
-    print("hej")
+
+    plt.scatter(coord_list[:, 0], coord_list[:, 1], s=2)
     plt.show()
-    # använd två parametrar i numrate(?)
 
 
-# 3
+# 3 - Creates a relation and cost array within a given radius of a city.
 def construct_graph_connections(coord_list, radius):
-    for index, value in enumerate(coord_list, 1):
-        print("Index", index)
-        print("Value", value)
-    print("Hej")
+    relations = []
+    cost = []
+
+    for city1, value1 in enumerate(coord_list):
+        for city2 in range(city1, len(coord_list)):
+            value2 = coord_list[city2]
+            distance = np.linalg.norm(value1 - value2)
+
+            if (np.less_equal(distance, radius) and distance != 0):
+                relations.append((city1, city2))
+                cost.append(distance**(9./10.))
+
+    return np.array(relations), np.array(cost)
+
+
+def construct_graph(indices, costs, N):
+    M = N
+
+    test = csr_matrix((costs, indices[:, 0], indices[0, :]), shape=(M, N))
+    print(test, sep='')
 
 
 def main(city):
-    # plot_points(read_coordinate_file(city))
+    radius = citiesDistRadius[city]
+    indices, costs = construct_graph_connections(read_coordinate_file(city),
+                                                 radius)
+    N = len(read_coordinate_file(city))
     # print(read_coordinate_file(city))
-    # read_coordinate_file(city)
-    construct_graph_connections(read_coordinate_file(city), 0.08)
+
+    # plot_points(read_coordinate_file(city))
+    construct_graph(indices, costs, N)
 
 
-main(sampleCities)
-
+main(startCity)
