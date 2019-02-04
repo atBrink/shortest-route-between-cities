@@ -23,6 +23,7 @@ def read_coordinate_file(filename):
 
     # Delete the row that we initialized with.
     coord_list = np.delete(coord_list, 0, axis=0)
+
     citiesCoordinates.close
     return coord_list
 
@@ -31,19 +32,18 @@ def read_coordinate_file(filename):
 def construct_graph_connections(coord_list, radius):
     print("Hej")
 
-    print(coord_list)
-
 
 # 2
 def plot_points(coord_list):
-    read_coordinate_file("SampleCoordinates.txt")
+    # read_coordinate_file("SampleCoordinates.txt")
     x = np.linspace(0, 2, num=9)
     y = np.cos(x)
     plt.plot(x, y)
-    print("hej")
+    # print("hej")
     plt.show()
     # använd två parametrar i numrate(?)
-    # måste köra den första definitionen i den andra? Eller typ få någon output...
+    # måste köra den första definitionen i den andra? 
+    # Eller typ få någon output...
 
 
 def main(city):
