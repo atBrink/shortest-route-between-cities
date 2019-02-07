@@ -1,7 +1,6 @@
 import numpy as np
 # import scipy as sp
 from scipy.sparse import csr_matrix
-# import matplotlib.pyplot as plt
 from matplotlib import pyplot as plt
 from matplotlib.collections import LineCollection
 
@@ -13,7 +12,7 @@ citiesRadius = 1
 citiesDistRadius = {germanCities: 0.0025, hungaryCities: 0.005,
                     sampleCities: 0.08}
 
-# STARTA HÄR YO!!!!!!!!!
+# Pick the county you want to travel in.
 startCity = sampleCities
 
 
@@ -36,26 +35,32 @@ def read_coordinate_file(filename):
     return np.array(coord_list)
 
 
-# 2 - Creates a plot of the coordinates given
+# 2,5  - Creates a plot of the coordinates given
 def plot_points(coord_list, indices):
-    #  N = len(coord_list)
-    x = coord_list[:, 0]
-    # y = coord_list[:, 1]
-    ax = plt.axes()
-    # print(coord_list)
-    # ys = [x + i for i in x]
-    
-    line_segments = LineCollection([list(zip(x, y)) for y in coord_list],
-                                   linewidths=(0.5, 1, 1.5, 2),
-                                   linestyles='solid')
-    line_segments.set_array(x)
-    ax.add_collection(line_segments)
-    # ax.set_title('Line Collection with mapped colors')
-    # plt.sci(line_segments)  # This allows interactive changing of the colormap.
-    plt.show()
 
-    # plt.scatter(coord_list[:, 0], coord_list[:, 1], s=2)
-    # plt.show()
+    lines = []
+    for i in indices:
+        line = []
+
+        # City 1
+        x1 = coord_list[i[0], 0]
+        y1 = coord_list[i[0], 1]
+
+        # City 2
+        x2 = coord_list[i[1], 0]
+        y2 = coord_list[i[1], 1]
+
+        # Connect the coordinates in one list.
+        line = [(x1, y1), (x2, y2)]
+        lines.append(line)
+
+    lines_segments = LineCollection(lines)
+    fig = plt.figure(figsize=(15, 10))
+    ax = fig.gca()
+    ax.add_collection(lines_segments)
+    ax.set_xlim(min(coord_list[:, 0]), max(coord_list[:, 0]))
+    ax.set_ylim(min(coord_list[:, 1]), max(coord_list[:, 1]))
+    plt.show()
 
 
 # 3 - Creates a relation and cost array within a given radius of a city.
@@ -77,7 +82,8 @@ def construct_graph_connections(coord_list, radius):
 
 def construct_graph(indices, costs, N):
     M = N
-    sparseMatrix = csr_matrix((costs, (indices[:, 0], indices[:, 1])), shape=(M, N))
+    sparseMatrix = csr_matrix((costs, (indices[:, 0], indices[:, 1])),
+                              shape=(M, N))
     print(sparseMatrix, sep='')
 
     return sparseMatrix
@@ -87,10 +93,7 @@ def main(city):
     radius = citiesDistRadius[city]
     indices, costs = construct_graph_connections(read_coordinate_file(city),
                                                  radius)
-    N = len(read_coordinate_file(city))
-    print(indices)
-    # print(read_coordinate_file(city))
-    # print(len(read_coordinate_file(city)))
+    # N = len(read_coordinate_file(city))
     plot_points(read_coordinate_file(city), indices)
 
 
