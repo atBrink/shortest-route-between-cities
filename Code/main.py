@@ -1,7 +1,9 @@
 import numpy as np
 # import scipy as sp
 from scipy.sparse import csr_matrix
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
+from matplotlib.collections import LineCollection
 
 germanCities = "GermanyCities.txt"
 hungaryCities = "HungaryCities.txt"
@@ -35,10 +37,25 @@ def read_coordinate_file(filename):
 
 
 # 2 - Creates a plot of the coordinates given
-def plot_points(coord_list):
-
-    plt.scatter(coord_list[:, 0], coord_list[:, 1], s=2)
+def plot_points(coord_list, indices):
+    #  N = len(coord_list)
+    x = coord_list[:, 0]
+    # y = coord_list[:, 1]
+    ax = plt.axes()
+    # print(coord_list)
+    # ys = [x + i for i in x]
+    
+    line_segments = LineCollection([list(zip(x, y)) for y in coord_list],
+                                   linewidths=(0.5, 1, 1.5, 2),
+                                   linestyles='solid')
+    line_segments.set_array(x)
+    ax.add_collection(line_segments)
+    # ax.set_title('Line Collection with mapped colors')
+    # plt.sci(line_segments)  # This allows interactive changing of the colormap.
     plt.show()
+
+    # plt.scatter(coord_list[:, 0], coord_list[:, 1], s=2)
+    # plt.show()
 
 
 # 3 - Creates a relation and cost array within a given radius of a city.
@@ -60,9 +77,10 @@ def construct_graph_connections(coord_list, radius):
 
 def construct_graph(indices, costs, N):
     M = N
+    sparseMatrix = csr_matrix((costs, (indices[:, 0], indices[:, 1])), shape=(M, N))
+    print(sparseMatrix, sep='')
 
-    test = csr_matrix((costs, indices[:, 0], indices[0, :]), shape=(M, N))
-    print(test, sep='')
+    return sparseMatrix
 
 
 def main(city):
@@ -70,10 +88,10 @@ def main(city):
     indices, costs = construct_graph_connections(read_coordinate_file(city),
                                                  radius)
     N = len(read_coordinate_file(city))
+    print(indices)
     # print(read_coordinate_file(city))
-
-    # plot_points(read_coordinate_file(city))
-    construct_graph(indices, costs, N)
+    # print(len(read_coordinate_file(city)))
+    plot_points(read_coordinate_file(city), indices)
 
 
 main(startCity)
