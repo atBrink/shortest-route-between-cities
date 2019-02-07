@@ -18,6 +18,18 @@ startCity = sampleCities
 # 1 - Read Coordinate-file and convert the string-values to float-values,
 # returns np.array of coordinates.
 def read_coordinate_file(filename):
+    '''
+    Function to read the input file and change it from strings to numPy array with floats. It also calculates
+    the coordinates which depend on the values in the input-file.
+
+    PARAMETERS:
+    ----------
+    :param filename: string, the file to read
+
+    RETURNS:
+    --------
+    :return: numPy array, containing coordinates
+    '''
     mode1 = 'r'
     coord_list = []
     with open(filename, mode1) as citiesCoordinates:
@@ -36,6 +48,18 @@ def read_coordinate_file(filename):
 
 # 2 - Creates a plot of the coordinates given
 def plot_points(coord_list):
+    '''
+    Plots the cities locations
+
+    PARAMETERS:
+    -----------
+    :param coord_list: numPy array, list of coordinates
+
+    RETURNS:
+    --------
+    :return: plot of coordinates
+
+    '''
 
     plt.scatter(coord_list[:, 0], coord_list[:, 1], s=2)
     plt.show()
@@ -43,6 +67,20 @@ def plot_points(coord_list):
 
 # 3 - Creates a relation and cost array within a given radius of a city.
 def construct_graph_connections(coord_list, radius):
+    '''
+    Calculates which cities that are within the given radius from the current city, and therefore a possible route.
+    The distance between the cities is used to calculate the cost.
+
+    PARAMETERS:
+    -----------
+    :param coord_list: contains the coordinates of all cities in the read file.
+    :param radius: a float that is given depending on which file that is beeing read.
+    
+    RETURNS:
+    --------
+    :return: an array that states which cities that are close to one another and an array that states the cost
+    of traveling the distance.
+    '''
     relations = []
     cost = []
 
@@ -77,3 +115,5 @@ def main(city):
 
 
 main(startCity)
+
+# cheat sheet?
