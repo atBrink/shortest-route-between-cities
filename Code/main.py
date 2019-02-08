@@ -1,5 +1,4 @@
 import numpy as np
-# import scipy as sp
 from scipy.sparse import csr_matrix, csgraph
 from scipy.spatial.ckdtree import cKDTree
 from matplotlib import pyplot as plt
@@ -15,20 +14,23 @@ citiesDistRadius = {germanCities: 0.0025, hungaryCities: 0.005,
                     sampleCities: 0.08}
 
 # Pick the county you want to travel in.
-startCity = hungaryCities
+startCity = germanCities
+STARTNODE = 1573 # 311
+ENDNODE = 10584 # 702
 
-functionBenchmarks = []
+# on = 1
+# off = 0
+showGraph = 0
+fastOrNot = 1
+
+functionSpeed = []
 funcIndex = []
-STARTNODE = 311
-ENDNODE = 702
 
-# 1 - Read Coordinate-file and convert the string-values to float-values,
-# returns np.array of coordinates.
 def read_coordinate_file(filename):
     '''
     Function to read the input file and change it from strings to numPy
-     array with floats. It also calculates the coordinates which depend on
-      the values in the input-file.
+    array with floats. It also calculates the coordinates which depend on
+    the values in the input-file.
 
     PARAMETERS:
     ----------
@@ -52,11 +54,11 @@ def read_coordinate_file(filename):
             c = (x, y)
             coord_list.append(c)
     end = time.time()
-    functionBenchmarks.append([read_coordinate_file.__name__,end - start])
+    functionSpeed.append([read_coordinate_file.__name__,end - start])
     return np.array(coord_list)
 
 # 2 - Creates a plot of the coordinates given
-def plot_points(coord_list, indices, path):
+def plot_points(coord_list, indices, path, showGraph):
     '''
     Plots the cities locations
 
@@ -102,12 +104,13 @@ def plot_points(coord_list, indices, path):
     ax.set_xlim(min(coord_list[:, 0]), max(coord_list[:, 0]))
     ax.set_ylim(min(coord_list[:, 1]), max(coord_list[:, 1]))
 
-    for i, ind in enumerate(coord_list):
-        ax.annotate(i, (coord_list[i,0], coord_list[i,1]))
-    plt.show()
-
+    #for i, ind in enumerate(coord_list):
+    #    ax.annotate(i, (coord_list[i,0], coord_list[i,1]))
+    if showGraph == 1:
+        plt.show()
+    
     end = time.time()
-    functionBenchmarks.append([plot_points.__name__, end - start])
+    functionSpeed.append([plot_points.__name__, end - start])
 
 # 3 - Creates a relation and cost array within a given radius of a city.
 def construct_graph_connections(coord_list, radius):
@@ -141,7 +144,7 @@ def construct_graph_connections(coord_list, radius):
                 cost.append(distance**(9./10.))
 
     end = time.time()
-    functionBenchmarks.append([construct_graph_connections.__name__, end - start])
+    functionSpeed.append([construct_graph_connections.__name__, end - start])
     return np.array(relations), np.array(cost)
 
 
@@ -166,7 +169,7 @@ def construct_graph(indices, costs, N):
     # print(sparseMatrix, sep='')
 
     end = time.time()
-    functionBenchmarks.append([construct_graph.__name__, end - start])
+    functionSpeed.append([construct_graph.__name__, end - start])
     return sparseMatrix
 
 
@@ -199,7 +202,7 @@ def cheapest_path(indices, startNode, endNode):
     totalCost = dist_matrix[endNode]
     
     end = time.time()
-    functionBenchmarks.append([cheapest_path.__name__, end - start])
+    functionSpeed.append([cheapest_path.__name__, end - start])
     return path[::-1], totalCost
 
 def construct_fast_graph_connections(coord_list, radius):
@@ -227,10 +230,9 @@ def construct_fast_graph_connections(coord_list, radius):
                     cost.append(distance**(9./10.))
                     relations.append(cityCon)
     end = time.time()
-    functionBenchmarks.append([construct_fast_graph_connections.__name__, end - start])
+    functionSpeed.append([construct_fast_graph_connections.__name__, end - start])
 
     return np.array(relations), np.array(cost)
-
 
 
 def main(city, startNode, endNode):
@@ -253,28 +255,40 @@ def main(city, startNode, endNode):
     radius = citiesDistRadius[city] # grab radius from start node
 
     # fastOrNot = input("Want to run fast or regular graph connections? y/n \n")
-    fastOrNot = 'y'
-    if fastOrNot.upper() == 'Y':
+    if fastOrNot == 1:
         indices, costs = construct_fast_graph_connections(coord_list, radius)
+        graphConnectorMode = "Fast"
     else:
         indices, costs = construct_graph_connections(coord_list, radius)
-    # print(indices)
-    # print(np.shape(indices))
+        graphConnectorMode = "Regular"
+
     N = len(coord_list)
     sparseMatrix = construct_graph(indices, costs, N)
-    
     path, totalCost = cheapest_path(sparseMatrix, startNode, endNode)
 
     # CREATE PLOT OF CITIES
-    plot_points(coord_list, indices, path)
+    plot_points(coord_list, indices, path, showGraph)
+ 
 
-    for i in range(len(functionBenchmarks)):
-        print(functionBenchmarks[i])
-    print(path)
-    print(totalCost)
-    # print(functionBenchmarks)
-    # print(readCoordinateFile_timer)
-    
+    print('################################################')
+    print('Data:')
+    print('\t Chosen file: {}'.format(city.strip('.txt')))
+    print('\t Chosen start city: {}'.format(startNode))
+    print('\t Chosen end city: {}'.format(endNode))
+    print('\t Cheapest path: {}'.format(path))
+    print('\t Total Cost from start to finish: {:.4f}'.format(totalCost))
+    print('----------------------------------------------')
+    print('Time benchmark for the used functions:')
+    print('\n'.join('\t {}: {:.4f}s'.format(i[0], i[1]) for k, i in enumerate(functionSpeed)))
+    totTime = 0
+    for i in functionSpeed:
+        totTime = totTime + float(i[1])
+    print('\t Total Time: {}s'.format(totTime))
+    print('----------------------------------------------')
+    print('Run info:')
+    print('\t Graph Connection calc: {}'.format(graphConnectorMode))
+    print('\t Show graph: {}'.format(showGraph))
+    print('################################################')
 
     
 main(startCity, STARTNODE, ENDNODE)
