@@ -14,7 +14,8 @@ citiesDistRadius = {germanCities: 0.0025, hungaryCities: 0.005,
 
 # Pick the county you want to travel in.
 startCity = hungaryCities
-
+STARTNODE = 311
+ENDNODE = 702
 
 # 1 - Read Coordinate-file and convert the string-values to float-values,
 # returns np.array of coordinates.
@@ -134,6 +135,19 @@ def construct_graph_connections(coord_list, radius):
 
 
 def construct_graph(indices, costs, N):
+    '''
+    Creates a tabular that contains the indices and the cost to travel between the two cities.
+
+    PARAMETERS:
+    -----------
+    :param indices: a table that shows which cities that are within the radius of another city.
+    :param costs: a table that shows the costs to travel from one city to another.
+    :param N: number of nodes(cities)
+
+    RETURNS:
+    --------
+    :return:a tabular with costs for certain distances between cities.
+    '''
     M = N
     sparseMatrix = csr_matrix((costs, (indices[:, 0], indices[:, 1])),
                               shape=(M, N))
@@ -143,6 +157,20 @@ def construct_graph(indices, costs, N):
 
 
 def cheapest_path(indices, startNode, endNode):
+    '''
+    Finally we are about to see which path that is the cheapest!! The method to solve the problem is the command
+    Dijkstra, a function that is already in the python scipy.sparse.csgraph library.
+
+    PARAMETERS:
+    -----------
+    :param indices: shows which cities that are related, and the cost to travel the distance
+    :param startNode: the city to start in
+    :param endNode: the city to end in.
+
+    RETURNS:
+    --------
+    :return: the cheapest path from the startcity to the endcity, and the total cost of traveling it.
+    '''
     dist_matrix, predecessor = csgraph.dijkstra(csgraph=indices, directed=False, indices=startNode, return_predecessors=True)
     path = []
     path.append(endNode)
@@ -160,6 +188,21 @@ def cheapest_path(indices, startNode, endNode):
 
 
 def main(city, startNode, endNode):
+    '''
+    This function is the one to rule them all. It's the function that joins the functions above and make it possible
+    to show the desired answer.
+
+    PARAMETERS:
+    -----------
+    :param city: the input-textfile that is read.
+    :param startNode: the city to start in.
+    :param endNode: the city to end in.
+
+    RETURNS:
+    --------
+    :return:a plot that shows the cheapest way, an array that shows the path (all nodes) that is the cheapest,
+    the cost of the path and how long the functions worked to return an answer.
+    '''
     coord_list = read_coordinate_file(city) # contains coordinates for cities
     radius = citiesDistRadius[city] # grab radius from start node
     indices, costs = construct_graph_connections(coord_list, radius)
@@ -174,8 +217,5 @@ def main(city, startNode, endNode):
     print(path)
     print(totalCost)
 
-
-STARTNODE = 311
-ENDNODE = 702
-
+    
 main(startCity, STARTNODE, ENDNODE)
