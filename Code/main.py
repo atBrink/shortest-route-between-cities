@@ -37,14 +37,16 @@ def read_coordinate_file(filename):
     with open(filename, mode1) as citiesCoordinates:
 
         for coord in citiesCoordinates:
-            a = coord[1:-2:]
+            print(coord)
+            a = coord.strip('{}')
+            # a = coord[1:-2:]
             longitud, latitud = a.split(',')
             longitud, latitud = float(longitud), float(latitud)
             x = citiesRadius*(np.pi * latitud)/180
             y = citiesRadius*np.log(np.tan((np.pi/4)+(np.pi*longitud)/360))
             c = (x, y)
             coord_list.append(c)
-
+    print(coord_list)
     return np.array(coord_list)
 
 # 2 - Creates a plot of the coordinates given
@@ -169,9 +171,11 @@ def main(city, startNode, endNode):
     # CREATE PLOT OF CITIES
     plot_points(coord_list, indices, path)
 
+    print(path)
+    print(totalCost)
 
 
-STARTNODE = 60
-ENDNODE = 553
+STARTNODE = 311
+ENDNODE = 702
 
 main(startCity, STARTNODE, ENDNODE)
