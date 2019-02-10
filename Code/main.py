@@ -202,7 +202,8 @@ def cheapest_path(indices, startNode, endNode):
 def construct_fast_graph_connections(coord_list, radius):
     '''
     Calculates which cities that are within the given radius from the
-    current city, and therefore a possible route.
+    current city, and therefore a possible route using CKDtree method and querying
+    for neighburs per node.
     The distance between the cities is used to calculate the cost.
 
     PARAMETERS:
