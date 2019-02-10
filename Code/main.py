@@ -10,9 +10,10 @@ germanCities = "GermanyCities.txt"
 hungaryCities = "HungaryCities.txt"
 sampleCities = 'SampleCoordinates.txt'
 
-CITIESRADIUS = 1
-citiesDistRadius = {germanCities: 0.0025, hungaryCities: 0.005,
-                    sampleCities: 0.08}
+##########################################################################
+
+# Pick the county you want to travel in.
+startCity = germanCities
 
 # Change here if you want different start and end nodes than the given ones.
 citiesStartNodes = {germanCities: 1573, hungaryCities: 311,
@@ -20,14 +21,18 @@ citiesStartNodes = {germanCities: 1573, hungaryCities: 311,
 citiesEndNodes = {germanCities: 10584, hungaryCities: 702,
                     sampleCities: 5}
 
-# Pick the county you want to travel in.
-startCity = hungaryCities
 
 # Toggle for graph and graph connection calc.
 # on = 1
 # off = 0
 showGraph = 0
-fastOrNot = 1
+fastOrNot = 0
+
+###############################################################################
+
+CITIESRADIUS = 1
+citiesDistRadius = {germanCities: 0.0025, hungaryCities: 0.005,
+                    sampleCities: 0.08}
 
 # lists to contain the time it takes to run each function.
 functionSpeed = []
@@ -70,10 +75,13 @@ def plot_points(coord_list, indices, path, showGraph):
     PARAMETERS:
     -----------
     :param coord_list: numPy array, list of coordinates
+    :param indices: numPy array containing the cities and their neighburs
+    :param path: list containing the route to plot
+    :param showGraph: 1 or 0 depending on wether to show graph
 
     RETURNS:
     --------
-    :return: plot of coordinates
+    :return: Shows a plot of the given coordinates and the route given in path
 
     '''
     start = time.time()
@@ -118,14 +126,14 @@ def construct_graph_connections(coord_list, radius):
 
     PARAMETERS:
     -----------
-    :param coord_list:  contains the coordinates of all cities in the read file.
+    :param coord_list: numPy array contains the coordinates of all cities in the read file.
     :param radius: a float that is given depending on which file that is
     being read.
     
     RETURNS:
     --------
-    :return: an array that states which cities that are close to one another and an array that states the cost
-    of traveling the distance.
+    :return: a numPy array that states which cities that are close to one another
+     and an array that states the cost of traveling the distance.
     '''
     start = time.time()
     relations = []
@@ -139,7 +147,7 @@ def construct_graph_connections(coord_list, radius):
             if distance < radius and distance != 0:
                 relations.append([city1, city2])
                 cost.append(distance**(9./10.))
-
+    
     end = time.time()
     functionSpeed.append([construct_graph_connections.__name__, end - start])
     return np.array(relations), np.array(cost)
@@ -150,9 +158,11 @@ def construct_graph(indices, costs, N):
 
     PARAMETERS:
     -----------
-    :param indices: a table that shows which cities that are within the radius of another city.
-    :param costs: a table that shows the costs to travel from one city to another.
-    :param N: number of nodes(cities)
+    :param indices: numPy array, a table that shows which cities that are within
+                    the radius of another city.
+    :param costs: numpy Array, a table that shows the costs to travel from one city
+                     to another.
+    :param N: int, number of nodes(cities)
 
     RETURNS:
     --------
@@ -174,9 +184,10 @@ def cheapest_path(indices, startNode, endNode):
 
     PARAMETERS:
     -----------
-    :param indices: shows which cities that are related, and the cost to travel the distance
-    :param startNode: the city to start in
-    :param endNode: the city to end in.
+    :param indices: numpy array, shows which cities that are related,
+                     and the cost to travel the distance
+    :param startNode: int, the city to start in
+    :param endNode: int, the city to end in.
 
     RETURNS:
     --------
@@ -208,9 +219,8 @@ def construct_fast_graph_connections(coord_list, radius):
 
     PARAMETERS:
     -----------
-    :param coord_list:  contains the coordinates of all cities in the read file.
-    :param radius: a float that is given depending on which file that is
-    being read.
+    :param coord_list: numpyarray, contains the coordinates of all cities in the read file.
+    :param radius: float that is given depending on which file that is being read.
     
     RETURNS:
     --------
@@ -218,30 +228,36 @@ def construct_fast_graph_connections(coord_list, radius):
     of traveling the distance.
     '''
     start = time.time()
+
     cost = []
     relations = []
 
-    tree = cKDTree(coord_list)
-    for city1, coord in enumerate(coord_list):
-        cityNeighburs = tree.query_ball_point(coord, radius)
-        cityNeighburs.remove(city1)
-        rel = []
-        for city2 in cityNeighburs:
-            rel = [city1,city2]
-            if (rel and rel[::-1]) not in relations:
-                value1 = coord_list[city1]
-                value2 = coord_list[city2]
-                distance = np.linalg.norm(value1 - value2)
+    x = coord_list[:, 0]
+    y = coord_list[:, 1]
 
-                cost.append(distance**(9./10.))
-                relations.append(rel)
-    b_set = set(tuple(x) for x in relations)
-    b = [ list(x) for x in b_set ]
-    b.sort(key = lambda x: relations.index(x) )
+    tree = cKDTree(list(zip(x,y)))
+    cityNeighburs = tree.query_ball_point(coord_list, radius)
 
+    for city1, closeCities in enumerate(cityNeighburs):
+        for  city2 in closeCities:
+            if city1 != city2:
+                relations.append([city1, city2])
+
+    relations=np.array(relations)
+    relations=np.sort(relations)
+    relations=np.unique(relations,axis=0)
+
+    # Calculating the cost between the cities
+    city1 = coord_list[relations[:,0]]
+    city2 = coord_list[relations[:,1]]
+    cost = (city1 - city2)**2
+    cost = np.sum(cost, axis=1)
+    cost = np.sqrt(cost)
+    cost = cost**(9/10)
+    
     end = time.time()
     functionSpeed.append([construct_fast_graph_connections.__name__, end - start])
-    return np.array(relations), np.array(cost)
+    return relations, cost
 
 def main(city):
     '''
