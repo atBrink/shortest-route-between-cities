@@ -5,6 +5,7 @@ from scipy.spatial import  distance
 from matplotlib import pyplot as plt
 from matplotlib.collections import LineCollection
 import time
+import math
 
 germanCities = "GermanyCities.txt"
 hungaryCities = "HungaryCities.txt"
@@ -57,11 +58,12 @@ def read_coordinate_file(filename):
     coord_list = []
     with open(filename, mode1) as citiesCoordinates:
         for coord in citiesCoordinates:
-            a = coord[1:-2:]
-            longitud, latitud = a.split(',')
+            coord = coord.strip("{")
+            coord = coord.rstrip("} \n")
+            longitud, latitud = coord.split(',', 1)
             longitud, latitud = float(longitud), float(latitud)
-            x = CITIESRADIUS*(np.pi * latitud)/180
-            y = CITIESRADIUS*np.log(np.tan((np.pi/4)+(np.pi*longitud)/360))
+            x = CITIESRADIUS*(math.pi * latitud)/180
+            y = CITIESRADIUS*math.log(math.tan((math.pi/4)+(math.pi*longitud)/360))
             c = (x, y)
             coord_list.append(c)
     end = time.time()
@@ -138,16 +140,14 @@ def construct_graph_connections(coord_list, radius):
     start = time.time()
     relations = []
     cost = []
-
     for city1, value1 in enumerate(coord_list):
-        for city2 in range(city1+1, len(coord_list)):
-            value2 = coord_list[city2]
-            distance = np.linalg.norm(value1 - value2)
-
-            if distance < radius and distance != 0:
+        for city2, value2 in enumerate(coord_list):
+            if city1 <= city2: continue
+            diff = value1 - value2
+            distance = math.hypot(*diff)
+            if distance < radius and city1 != city2:
                 relations.append([city1, city2])
                 cost.append(distance**(9./10.))
-    
     end = time.time()
     functionSpeed.append([construct_graph_connections.__name__, end - start])
     return np.array(relations), np.array(cost)
