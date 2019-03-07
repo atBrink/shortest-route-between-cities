@@ -10,7 +10,7 @@ import math
 GERMANCITIES = "GermanyCities.txt"
 HUNGARYCITIES = "HungaryCities.txt"
 SAMPLECITIES = 'SampleCoordinates.txt'
-CITIESRADIUS = 1
+
 ##########################################################################
 
 # Pick the county you want to travel in.
@@ -22,14 +22,14 @@ STARTCITY = HUNGARYCITIES
 showGraph = 1
 fastOrNot = 1
 
-# Change here if you want different start and end nodes than the given ones.
-citiesstartnodes = {GERMANCITIES: 1573, HUNGARYCITIES: 311,
-                    SAMPLECITIES: 0}
-citiesEndNodes = {GERMANCITIES: 10584, HUNGARYCITIES: 702,
-                  SAMPLECITIES: 5}
-citiesDistRadius = {GERMANCITIES: 0.0025, HUNGARYCITIES: 0.005,
-                    SAMPLECITIES: 0.08}
 ###############################################################################
+CITIESRADIUS = 1
+CITIESSTARTNODES = {GERMANCITIES: 1573, HUNGARYCITIES: 311,
+                    SAMPLECITIES: 0}
+CITIESENDNODES = {GERMANCITIES: 10584, HUNGARYCITIES: 702,
+                  SAMPLECITIES: 5}
+CITIESDISTRADIUS = {GERMANCITIES: 0.0025, HUNGARYCITIES: 0.005,
+                    SAMPLECITIES: 0.08}
 
 
 def read_coordinate_file(filename):
@@ -48,7 +48,6 @@ def read_coordinate_file(filename):
     '''
     start = time.time()
     mode1 = 'r'     # Read from fily only
-
     coord_list = []
 
     # open coordinate file and read line for line, extracting from the strings
@@ -60,6 +59,9 @@ def read_coordinate_file(filename):
             coord = coord.rstrip("} \n")
             longitud, latitud = coord.split(',', 1)
             longitud, latitud = float(longitud), float(latitud)
+
+            # Convert long/lat using the Mercator projection to obtain the
+            # coordinates in xy-format:
             x = CITIESRADIUS*(math.pi * latitud)/180
             y = CITIESRADIUS*math.log(math.tan((math.pi/4) +
                                                (math.pi*longitud)/360))
@@ -90,10 +92,9 @@ def plot_points(coord_list, indices, path, showGraph):
     lines = []
     cheapestPath = []
 
-    # loops over every city connection from input and splits them into two
-    # cities if the city connection is a part of the cheapest path (from
-    # cheapest path method) we add it as cheapest path. if not, we add the
-    # connection to the lines list.
+    # Loops over every city connection from input and splits them into two
+    #  cities.  If the connection is found in the cheapest path we add it to
+    # cheapestPath list. if not, we add the connection to the lines list.
     for city_connection in indices:
         line = []
         city1 = [coord_list[city_connection[0], 0],
@@ -113,7 +114,7 @@ def plot_points(coord_list, indices, path, showGraph):
     cheapest_segment = LineCollection(cheapestPath, linewidths=2, color='red',
                                       label="Cheapest Path")
 
-    fig = plt.figure(figsize=plt.figaspect(0.6))
+    fig = plt.figure(figsize=plt.figaspect(1))
     ax = fig.gca()
     ax.scatter(coord_list[:, 0], coord_list[:, 1], s=15, facecolor='red',
                label="Cities")
@@ -199,6 +200,7 @@ def construct_graph(indices, costs, N):
 
 
 def cheapest_path(indices, startnode, endNode):
+
     '''
     Finally we are about to see which path that is the cheapest!!  The method
     to solve the problem is the command Dijkstra, a function that is already
@@ -228,7 +230,7 @@ def cheapest_path(indices, startnode, endNode):
     # "current node"
     dist_matrix, predecessor = csgraph.dijkstra(csgraph=indices,
                                                 directed=False,
-                                                ndices=startnode,
+                                                indices=startnode,
                                                 return_predecessors=True)
     path = []
     path.append(endNode)
@@ -330,9 +332,9 @@ def main(city):
              long the functions worked to return an answer.
     '''
     coord_list = read_coordinate_file(city)  # contains coordinates for cities
-    radius = citiesDistRadius[city]  # grab radius from start node
-    startnode = citiesstartnodes[city]
-    endnode = citiesEndNodes[city]
+    radius = CITIESDISTRADIUS[city]  # grab radius from start node
+    startnode = CITIESSTARTNODES[city]
+    endnode = CITIESENDNODES[city]
 
     if fastOrNot == 1:
         indices, costs = construct_fast_graph_connections(coord_list, radius)
