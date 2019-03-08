@@ -14,7 +14,7 @@ SAMPLECITIES = 'SampleCoordinates.txt'
 ##########################################################################
 
 # Pick the county you want to travel in.
-STARTCITY = HUNGARYCITIES
+STARTCITY = GERMANCITIES
 
 # Toggle for graph and different graph connection calculations.
 # on = 1
@@ -114,8 +114,9 @@ def plot_points(coord_list, indices, path, showGraph):
     cheapest_segment = LineCollection(cheapestPath, linewidths=2, color='red',
                                       label="Cheapest Path")
 
-    fig = plt.figure(figsize=plt.figaspect(1))
+    fig = plt.figure()
     ax = fig.gca()
+    ax.axis("equal")
     ax.scatter(coord_list[:, 0], coord_list[:, 1], s=15, facecolor='red',
                label="Cities")
     ax.add_collection(lines_segments)
@@ -239,14 +240,14 @@ def cheapest_path(indices, startnode, endNode):
     # previous node to get to the current node. We start at the endnode and
     # work backwards "through" the matrix until we end up at the startnode.
     for i in predecessor:
-        prevNode = []
-        # -9999 since that is what the dijkstra function returns if the
-        # previous node and the current node is the same.
-        if (predecessor[path[-1]] != -9999):
-            prevNode = predecessor[path[-1]]
-            path.append(prevNode)
-        else:
+        prevNode = predecessor[path[-1]]
+        path.append(prevNode)
+
+        # When we end up on the startnode, add it and break the loop.
+        if (predecessor[path[-1]] == startnode):
+            path.append(startnode)
             break
+
     totalCost = dist_matrix[endNode]
 
     end = time.time()
