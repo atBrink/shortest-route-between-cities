@@ -6,15 +6,24 @@ from matplotlib import pyplot as plt
 from matplotlib.collections import LineCollection
 import time
 import math
+import os
 
-GERMANCITIES = "GermanyCities.txt"
-HUNGARYCITIES = "HungaryCities.txt"
-SAMPLECITIES = 'SampleCoordinates.txt'
+pathToCityData= os.getcwd()+'/data/'
+GERMANCITIES = pathToCityData+"GermanyCities.txt"
+HUNGARYCITIES = pathToCityData+"HungaryCities.txt"
+SAMPLECITIES = pathToCityData+'SampleCoordinates.txt'
 
 ##########################################################################
 
 # Pick the county you want to travel in.
-STARTCITY = GERMANCITIES
+print('Choose which city to travel in: \n Germany: 0 \n Hungary: 1')
+chosenCity = input('City:')
+if chosenCity == "0":
+    STARTCITY = GERMANCITIES
+elif chosenCity == "1":
+    STARTCITY = HUNGARYCITIES
+else:
+    STARTCITY = SAMPLECITIES
 
 # Toggle for graph and different graph connection calculations.
 # on = 1
